@@ -1,0 +1,4 @@
+id,lab,pc,fault,priority,status,createdAt,description
+INV-1795640605441,Lab 101,PC01,Mouse,Normal,Open,2026-11-26 02:33:25,mouse lags while using.
+INV-1795640810167,Lab 101,PC02,Keyboard,Normal,Open,2026-11-26 02:36:50,not working perfectly.
+INV-1795641379035,Lab 101,PC03,Mouse,Normal,Open,2026-11-26 02:46:19,faulty

@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INVENTRA | Student Portal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#071426;color:#eaf2ff;font-family:"DM Sans",sans-serif;min-height:100vh}
+    header{min-height:76px;padding:0 7%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #20334d;background:#0a1a30}
+    .brand{font:800 22px Manrope;color:#fff;letter-spacing:.5px}
+    .brand span{color:#58a6ff}
+    .user{display:flex;align-items:center;gap:14px;color:#a9bdd7;font-size:14px}
+    button{border:0;border-radius:10px;padding:11px 17px;font-weight:700;cursor:pointer;font-family:inherit}
+    .logout{background:#1c3554;color:#dcecff}
+    main{max-width:1050px;margin:42px auto;padding:0 22px}
+    .eyebrow{color:#65b5ff;font-size:12px;font-weight:800;letter-spacing:2px}
+    h1{font:800 clamp(27px,4vw,38px) Manrope;margin:9px 0}
+    .sub{color:#9bb0ca;margin:0 0 28px}
+    .layout{display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
+    .card{background:#0d2038;border:1px solid #203b5d;border-radius:18px;padding:25px;box-shadow:0 15px 40px #0002}
+    h2{font:700 19px Manrope;margin:0 0 20px}
+    label{display:block;font-size:13px;color:#b7c9df;font-weight:700;margin:16px 0 8px}
+    input,select,textarea{width:100%;padding:13px 14px;background:#08182b;border:1px solid #294361;border-radius:10px;color:#edf5ff;font:inherit;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:#58a6ff}
+    select:disabled{opacity:.6;cursor:not-allowed}
+    textarea{min-height:115px;resize:vertical}
+    .primary{width:100%;margin-top:20px;background:linear-gradient(110deg,#2879e8,#54b5ff);color:#fff;padding:14px}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .message{display:none;margin-top:15px;padding:12px;border-radius:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+    .success{display:block;background:#103b35;color:#9af0ce;border:1px solid #236c5d}
+    .error{display:block;background:#421f2a;color:#ffb6c1;border:1px solid #783747}
+    .info{color:#9bb0ca;font-size:14px;line-height:1.7}
+    .ticket{margin-top:18px;padding:16px;background:#091a2e;border:1px solid #294361;border-radius:12px}
+    .ticket strong{color:#68b6ff}
+    .pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#17395c;color:#8fc8ff;font-size:11px;font-weight:800}
+    footer{text-align:center;color:#66809f;font-size:12px;padding:35px}
+    @media(max-width:760px){
+      .layout{grid-template-columns:1fr}
+      header{padding:14px 18px;gap:12px}
+      .user{gap:8px}
+      .user span{max-width:125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      main{margin:28px auto}
+      .card{padding:20px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="brand">INVEN<span>TRA</span></div>
+  <div class="user">
+    <span id="userName">Checking login...</span>
+    <button class="logout" id="logoutBtn" type="button">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div class="eyebrow">STUDENT PORTAL</div>
+  <h1>Report a computer issue</h1>
+  <p class="sub">Submit a maintenance request and let the technical team take care of it.</p>
+
+  <div class="layout">
+    <section class="card">
+      <h2>New maintenance request</h2>
+
+      <form id="reportForm">
+        <label for="lab">Select laboratory</label>
+        <select id="lab" required>
+          <option value="">Loading laboratories...</option>
+        </select>
+
+        <label for="pc">Computer number</label>
+        <select id="pc" required disabled>
+          <option value="">Select a laboratory first</option>
+        </select>
+
+        <label for="fault">Type of issue</label>
+        <select id="fault" required>
+          <option value="">Choose issue type</option>
+          <option value="Mouse">Mouse</option>
+          <option value="Keyboard">Keyboard</option>
+          <option value="Display">Display</option>
+          <option value="Network">Network</option>
+          <option value="CPU / Power">CPU / Power</option>
+          <option value="Software">Software</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <label for="description">Describe the problem</label>
+        <textarea
+          id="description"
+          placeholder="Explain what is not working..."
+          maxlength="1000"
+        ></textarea>
+
+        <button class="primary" id="submitBtn" type="submit">
+          Submit maintenance request
+        </button>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <aside class="card">
+      <span class="pill">HOW IT WORKS</span>
+      <h2 style="margin-top:17px">Your report, tracked</h2>
+
+      <p class="info">1. Select your laboratory and computer.</p>
+      <p class="info">2. Describe the fault and submit your request.</p>
+      <p class="info">3. The administrator reviews and assigns the ticket.</p>
+      <p class="info">4. The maintenance worker updates the repair status.</p>
+
+      <div class="ticket">
+        <div class="info" style="margin-bottom:7px">Please remember</div>
+        <strong>One report per issue</strong>
+        <p class="info" style="margin-bottom:0">
+          Choose the correct computer number so the maintenance team can locate it quickly.
+        </p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>INVENTRA · Campus Computer Maintenance System</footer>
+
+<script type="module">
+  import { watchAuth, logout } from "./js/firebase.js";
+  import { api, getLabs, submitReport } from "./js/api.js";
+
+  const $ = id => document.getElementById(id);
+
+  let currentUser = null;
+  let labsData = [];
+  let submitting = false;
+
+  function showMessage(message, type = "error") {
+    $("message").textContent = message;
+    $("message").className = "message " + type;
+  }
+
+  function clearMessage() {
+    $("message").textContent = "";
+    $("message").className = "message";
+  }
+
+  function labName(item) {
+    return String(item.lab_id ?? item.lab ?? item.name ?? "");
+  }
+
+  function pcName(item) {
+    if (typeof item === "string") return item;
+    return String(item.asset_code ?? item.pc ?? item.name ?? "");
+  }
+
+  function displayPcName(code) {
+    const match = String(code).match(/(\d+)$/);
+    return match
+      ? "PC" + String(Number(match[1])).padStart(2, "0")
+      : String(code);
+  }
+
+  function isWorking(pc) {
+    if (typeof pc === "string") return true;
+
+    const status = String(pc.status ?? "Working").toLowerCase().trim();
+    return status === "working" || status === "available";
+  }
+
+  async function loadLabs() {
+    $("lab").disabled = true;
+    $("lab").innerHTML = '<option value="">Loading laboratories...</option>';
+
+    const result = await getLabs();
+    labsData = Array.isArray(result.labs) ? result.labs : [];
+
+    $("lab").innerHTML = '<option value="">Choose laboratory</option>';
+
+    labsData.forEach(item => {
+      const name = labName(item);
+      if (!name) return;
+
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = item.lab || name;
+      $("lab").appendChild(option);
+    });
+
+    $("lab").disabled = labsData.length === 0;
+
+    if (!labsData.length) {
+      $("lab").innerHTML = '<option value="">No laboratories found</option>';
+    }
+  }
+
+  function loadComputers() {
+    const selected = labsData.find(
+      item => labName(item) === $("lab").value
+    );
+
+    const pcs = selected && Array.isArray(selected.pcs)
+      ? selected.pcs
+      : [];
+
+    $("pc").innerHTML = '<option value="">Choose computer</option>';
+
+    const availablePcs = pcs.filter(isWorking);
+
+    availablePcs.forEach(pc => {
+      const code = pcName(pc);
+      if (!code) return;
+
+      const displayName = displayPcName(code);
+      const option = document.createElement("option");
+
+      // The backend matches the computer number from this value.
+      option.value = displayName;
+      option.textContent = displayName;
+
+      $("pc").appendChild(option);
+    });
+
+    $("pc").disabled = availablePcs.length === 0;
+
+    if (pcs.length && !availablePcs.length) {
+      $("pc").innerHTML =
+        '<option value="">No working computers available</option>';
+    }
+  }
+
+  $("lab").addEventListener("change", () => {
+    clearMessage();
+    loadComputers();
+  });
+
+  $("reportForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (submitting) return;
+
+    if (!currentUser) {
+      showMessage("Your login session has expired. Please sign in again.");
+      return;
+    }
+
+    const payload = {
+      lab: $("lab").value,
+      pc: $("pc").value,
+      fault: $("fault").value,
+      description: $("description").value.trim()
+    };
+
+    if (!payload.lab || !payload.pc || !payload.fault) {
+      showMessage("Please select a laboratory, computer and issue type.");
+      return;
+    }
+
+    submitting = true;
+    $("submitBtn").disabled = true;
+    $("submitBtn").textContent = "Submitting...";
+    clearMessage();
+
+    try {
+      const result = await submitReport(payload);
+
+      const ticketCode =
+        result.ticket_code ||
+        result.ticketId ||
+        result.ticket_id ||
+        result.id ||
+        "Created";
+
+      showMessage(
+        "Report submitted successfully! Your ticket ID is: " + ticketCode,
+        "success"
+      );
+
+      $("reportForm").reset();
+      $("pc").innerHTML =
+        '<option value="">Select a laboratory first</option>';
+      $("pc").disabled = true;
+
+      // Reload inventory in case the reported computer is now marked faulty.
+      await loadLabs();
+
+    } catch (error) {
+      showMessage(error.message || "Unable to submit the report.");
+    } finally {
+      submitting = false;
+      $("submitBtn").disabled = false;
+      $("submitBtn").textContent = "Submit maintenance request";
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    $("logoutBtn").disabled = true;
+
+    try {
+      await logout();
+      location.href = "/login";
+    } catch (error) {
+      showMessage("Could not log out. Please try again.");
+      $("logoutBtn").disabled = false;
+    }
+  });
+
+  watchAuth(async user => {
+    if (!user) {
+      location.href = "/login";
+      return;
+    }
+
+    currentUser = user;
+    $("userName").textContent =
+      user.displayName || user.email || "Student";
+
+    try {
+      // Confirm the user's role using the authenticated backend.
+      const profile = await api("/me");
+      const role = String(
+        profile.role || profile.profile?.role || "student"
+      ).toLowerCase();
+
+      if (role === "admin") {
+        location.href = "/admin";
+        return;
+      }
+
+      if (role === "worker") {
+        location.href = "/worker";
+        return;
+      }
+
+      if (role !== "student") {
+        showMessage("Your account does not have student portal access.");
+        return;
+      }
+
+      const displayName =
+        profile.display_name ||
+        profile.name ||
+        profile.profile?.display_name ||
+        user.displayName ||
+        user.email ||
+        "Student";
+
+      $("userName").textContent = displayName;
+
+      await loadLabs();
+
+    } catch (error) {
+      showMessage(
+        "Could not load your profile or laboratories: " +
+        (error.message || "Please try again.")
+      );
+    }
+  });
+</script>
+</body>
+</html>

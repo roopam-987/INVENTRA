@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INVENTRA | Worker Console</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#07111f;
+  --panel:#101e30;
+  --line:#263b54;
+  --blue:#438cff;
+  --text:#edf4ff;
+  --muted:#91a4bc;
+  --green:#27cf91;
+  --red:#ff6474;
+  --amber:#f4b84d;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:radial-gradient(ellipse at 10% 0%,#142c4b 0,transparent 42%),var(--bg);
+  color:var(--text);
+  font-family:"DM Sans",Inter,Segoe UI,Arial,sans-serif;
+}
+
+header{
+  min-height:76px;
+  padding:16px 5%;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  background:#091525;
+}
+
+.brand{font-weight:900;font-size:22px;font-family:Manrope,sans-serif}
+.brand span{color:#75adff}
+.header-right{display:flex;align-items:center;gap:14px}
+.muted{color:var(--muted);font-size:13px}
+
+button{
+  background:#24569a;
+  color:var(--text);
+  border:1px solid #34577d;
+  padding:9px 13px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+  font-family:inherit;
+}
+
+button:hover{filter:brightness(1.15)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.logout{background:#10243b}
+
+main{max-width:1150px;margin:auto;padding:35px 22px}
+.eyebrow{color:#75adff;letter-spacing:2px;font-size:11px;font-weight:800}
+h1{margin:8px 0;font:800 clamp(28px,4vw,42px) Manrope,sans-serif}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin:25px 0;
+}
+
+.card,.panel{
+  background:linear-gradient(145deg,#122239,#0d1a2b);
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:20px;
+}
+
+.card small{color:var(--muted)}
+.card strong{display:block;font-size:29px;margin-top:8px;font-family:Manrope}
+
+.panel{padding:22px}
+
+.panel-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  margin-bottom:15px;
+  flex-wrap:wrap;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:850px;
+  font-size:13px;
+}
+
+th,td{
+  text-align:left;
+  padding:14px 10px;
+  border-bottom:1px solid #203148;
+  vertical-align:middle;
+}
+
+th{
+  font-size:10px;
+  letter-spacing:1px;
+  color:#8ca2bd;
+}
+
+td{color:#dce9f8}
+
+.wrap{overflow-x:auto}
+
+.pill{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:700;
+  background:#26384c;
+}
+
+.pill.open{color:#ffbd67;background:#44321e}
+.pill.progress{color:#83b5ff;background:#18365b}
+.pill.resolved{color:#64e0b2;background:#153e32}
+
+select{
+  background:#10243b;
+  color:var(--text);
+  border:1px solid #34577d;
+  padding:9px;
+  border-radius:8px;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+.feedback{
+  display:none;
+  margin:12px 0;
+  padding:12px;
+  border-radius:9px;
+  font-size:13px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+
+.feedback.success{
+  display:block;
+  color:#9af0ce;
+  background:#103b35;
+  border:1px solid #236c5d;
+}
+
+.feedback.error{
+  display:block;
+  color:#ffb6c1;
+  background:#421f2a;
+  border:1px solid #783747;
+}
+
+.empty{text-align:center;color:var(--muted);padding:25px}
+
+@media(max-width:650px){
+  header{padding:14px 18px}
+  .header-right{gap:8px}
+  .header-right .muted{display:none}
+  main{padding:25px 15px}
+  .stats{grid-template-columns:1fr}
+  .card{padding:15px}
+  .panel{padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">INVENTRA<span>.</span></div>
+
+  <div class="header-right">
+    <span class="muted" id="workerName">Checking login...</span>
+    <button class="logout" id="logoutBtn" type="button">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div class="eyebrow">INVENTRA / FIELD OPERATIONS</div>
+
+  <h1>Assigned maintenance queue</h1>
+
+  <p class="muted">
+    Review reported faults, update repair progress and resolve completed work.
+  </p>
+
+  <section class="stats">
+    <div class="card">
+      <small>Open</small>
+      <strong id="openCount">—</strong>
+    </div>
+
+    <div class="card">
+      <small>In progress</small>
+      <strong id="progressCount">—</strong>
+    </div>
+
+    <div class="card">
+      <small>Resolved</small>
+      <strong id="resolvedCount">—</strong>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <b>Maintenance tickets</b>
+        <div class="muted">Tickets assigned to your account</div>
+      </div>
+
+      <button id="refreshBtn" type="button">Refresh ↻</button>
+    </div>
+
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+
+    <div class="wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>TICKET</th>
+            <th>LOCATION</th>
+            <th>FAULT</th>
+            <th>DETAILS</th>
+            <th>CREATED</th>
+            <th>STATUS</th>
+            <th>UPDATE</th>
+          </tr>
+        </thead>
+
+        <tbody id="rows">
+          <tr><td colspan="7" class="empty">Loading tickets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { watchAuth, logout } from "./js/firebase.js";
+import { api, getTickets, updateTicket } from "./js/api.js";
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let loading = false;
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[char]));
+}
+
+function normalize(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function showFeedback(text, type = "success") {
+  $("feedback").textContent = text;
+  $("feedback").className = "feedback " + type;
+}
+
+function statusClass(status) {
+  const value = normalize(status);
+
+  if (value === "resolved") return "resolved";
+  if (value.includes("progress")) return "progress";
+  return "open";
+}
+
+function getTicketId(ticket) {
+  return ticket.id ||
+         ticket.database_id ||
+         ticket.databaseId ||
+         ticket.uuid ||
+         "";
+}
+
+function getTicketCode(ticket) {
+  return ticket.ticket_code ||
+         ticket.ticketCode ||
+         ticket.id ||
+         "—";
+}
+
+function getComputer(ticket) {
+  return ticket.asset_code ||
+         ticket.assetCode ||
+         ticket.pc ||
+         "—";
+}
+
+function getLocation(ticket) {
+  const lab = ticket.lab || ticket.lab_id || "—";
+  return lab + " / " + getComputer(ticket);
+}
+
+function getFault(ticket) {
+  return ticket.fault_type ||
+         ticket.fault ||
+         ticket.issue_type ||
+         "—";
+}
+
+function getCreated(ticket) {
+  const value = ticket.created_at || ticket.createdAt;
+
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime())
+    ? String(value)
+    : date.toLocaleString();
+}
+
+async function load() {
+  if (loading) return;
+
+  loading = true;
+  $("refreshBtn").disabled = true;
+
+  try {
+    const result = await getTickets();
+
+    const tickets = Array.isArray(result.tickets)
+      ? result.tickets
+      : [];
+
+    $("openCount").textContent = tickets.filter(
+      ticket => normalize(ticket.status) === "open"
+    ).length;
+
+    $("progressCount").textContent = tickets.filter(
+      ticket => normalize(ticket.status).includes("progress")
+    ).length;
+
+    $("resolvedCount").textContent = tickets.filter(
+      ticket => normalize(ticket.status) === "resolved"
+    ).length;
+
+    if (!tickets.length) {
+      $("rows").innerHTML =
+        '<tr><td colspan="7" class="empty">No tickets are assigned to you yet.</td></tr>';
+      return;
+    }
+
+    $("rows").innerHTML = tickets.map(ticket => {
+      const id = getTicketId(ticket);
+      const code = getTicketCode(ticket);
+      const status = ticket.status || "Open";
+
+      return `
+        <tr data-id="${esc(id)}" data-code="${esc(code)}">
+          <td><strong>${esc(code)}</strong></td>
+
+          <td>${esc(getLocation(ticket))}</td>
+
+          <td>${esc(getFault(ticket))}</td>
+
+          <td>${esc(ticket.description || "—")}</td>
+
+          <td>${esc(getCreated(ticket))}</td>
+
+          <td>
+            <span class="pill ${statusClass(status)}">
+              ${esc(status)}
+            </span>
+          </td>
+
+          <td>
+            <select class="status-select" aria-label="Update ticket status">
+              <option value="Open" ${normalize(status)==="open"?"selected":""}>Open</option>
+              <option value="In Progress" ${normalize(status)==="in progress"?"selected":""}>In Progress</option>
+              <option value="Resolved" ${normalize(status)==="resolved"?"selected":""}>Resolved</option>
+            </select>
+
+            <button class="save-btn" type="button">Save</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+  } catch (error) {
+    showFeedback(error.message || "Unable to load tickets.", "error");
+
+    $("rows").innerHTML =
+      '<tr><td colspan="7" class="empty">Unable to load tickets.</td></tr>';
+
+  } finally {
+    loading = false;
+    $("refreshBtn").disabled = false;
+  }
+}
+
+$("rows").addEventListener("click", async event => {
+  const button = event.target.closest(".save-btn");
+  if (!button) return;
+
+  const row = button.closest("tr");
+  if (!row) return;
+
+  const id = row.dataset.id;
+  const code = row.dataset.code;
+  const status = row.querySelector(".status-select").value;
+
+  if (!id) {
+    showFeedback(
+      "Ticket database ID is missing. Contact the administrator.",
+      "error"
+    );
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Saving...";
+
+  try {
+    await updateTicket(id, status);
+
+    showFeedback("Ticket " + code + " updated successfully.");
+    await load();
+
+  } catch (error) {
+    showFeedback(error.message || "Could not update ticket.", "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Save";
+  }
+});
+
+$("refreshBtn").addEventListener("click", load);
+
+$("logoutBtn").addEventListener("click", async () => {
+  $("logoutBtn").disabled = true;
+
+  try {
+    await logout();
+    location.href = "/login";
+  } catch (error) {
+    showFeedback("Could not log out. Please try again.", "error");
+    $("logoutBtn").disabled = false;
+  }
+});
+
+watchAuth(async user => {
+  if (!user) {
+    location.href = "/login";
+    return;
+  }
+
+  currentUser = user;
+
+  try {
+    const profile = await api("/me");
+
+    const role = normalize(
+      profile.role ||
+      profile.profile?.role ||
+      ""
+    );
+
+    if (role !== "worker") {
+      if (role === "admin") {
+        location.href = "/admin";
+      } else if (role === "student") {
+        location.href = "/user";
+      } else {
+        showFeedback("Your account does not have worker access.", "error");
+      }
+      return;
+    }
+
+    $("workerName").textContent =
+      profile.display_name ||
+      profile.name ||
+      profile.profile?.display_name ||
+      user.displayName ||
+      user.email ||
+      "Maintenance Worker";
+
+    await load();
+
+  } catch (error) {
+    showFeedback(
+      error.message || "Unable to verify your worker account.",
+      "error"
+    );
+  }
+});
+</script>
+
+</body>
+</html>

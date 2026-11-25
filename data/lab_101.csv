@@ -1,0 +1,13 @@
+pcId,assetId,status
+PC01,INV-L101-1,Faulty
+PC02,INV-L101-2,Faulty
+PC03,INV-L101-3,Faulty
+PC04,INV-L101-4,Working
+PC05,INV-L101-5,Working
+PC06,INV-L101-6,Working
+PC07,INV-L101-7,Working
+PC08,INV-L101-8,Working
+PC09,INV-L101-9,Working
+PC10,INV-L101-10,Working
+PC11,INV-L101-11,Working
+PC12,INV-L101-12,Working

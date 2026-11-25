@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INVENTRA | Login</title>
+  <meta name="theme-color" content="#071426">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: "DM Sans", sans-serif;
+      color: #edf4ff;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(45, 119, 255, .18), transparent 35%),
+        radial-gradient(circle at 85% 85%, rgba(0, 190, 255, .12), transparent 35%),
+        #071426;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      padding: 42px 36px;
+      border: 1px solid rgba(130, 170, 230, .18);
+      border-radius: 24px;
+      background: rgba(13, 31, 55, .88);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+      text-align: center;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 35px;
+      color: #fff;
+      font: 800 25px "Manrope", sans-serif;
+      letter-spacing: -.8px;
+    }
+
+    .brand-mark {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: white;
+      font-size: 21px;
+      background: linear-gradient(135deg, #287cff, #16b9ef);
+      box-shadow: 0 8px 24px rgba(40, 124, 255, .3);
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      color: #69b5ff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.2px;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font: 800 30px "Manrope", sans-serif;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      margin-bottom: 30px;
+      color: #9db0ca;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .google-btn {
+      width: 100%;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: 1px solid rgba(160, 190, 230, .25);
+      border-radius: 12px;
+      background: #f8fbff;
+      color: #17263b;
+      font: 700 14px "DM Sans", sans-serif;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .google-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .2);
+    }
+
+    .google-btn:disabled {
+      opacity: .65;
+      cursor: wait;
+      transform: none;
+    }
+
+    .google-icon {
+      width: 19px;
+      height: 19px;
+    }
+
+    #message {
+      min-height: 22px;
+      margin-top: 18px;
+      color: #ff9c9c;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 28px;
+      color: #7186a3;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 22px;
+      color: #80bdff;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: #fff;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 34px 23px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-card">
+    <div class="brand">
+      <span class="brand-mark">I</span>
+      <span>INVENTRA</span>
+    </div>
+
+    <p class="eyebrow">CAMPUS MAINTENANCE SYSTEM</p>
+    <h1>Welcome back</h1>
+    <p class="subtitle">
+      Sign in with your Google account to report computer issues,
+      manage maintenance requests, and track repairs.
+    </p>
+
+    <button class="google-btn" id="googleLogin" type="button">
+      <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.75 7.18l7.73 6C44.42 37.91 46.98 31.75 46.98 24.55z"/>
+        <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      <span>Continue with Google</span>
+    </button>
+
+    <p id="message" role="status" aria-live="polite"></p>
+
+    <a class="back-link" href="index.html">← Back to home</a>
+
+    <p class="footer">
+      INVENTRA · Smart Campus Computer Maintenance<br>
+      Secure authentication powered by Google
+    </p>
+  </main>
+
+  <script type="module">
+    import { loginWithGoogle, getToken } from "./js/firebase.js";
+    import { api } from "./js/api.js";
+
+    const loginButton = document.getElementById("googleLogin");
+    const message = document.getElementById("message");
+
+    loginButton.addEventListener("click", async () => {
+      loginButton.disabled = true;
+      loginButton.querySelector("span").textContent = "Signing you in...";
+      message.textContent = "";
+
+      try {
+        // Sign in using Google through Firebase.
+        const user = await loginWithGoogle();
+
+        // Get the Firebase ID token and ask the backend for the user's role.
+        await getToken();
+        const profile = await api("/me");
+
+        const role = String(profile.role || "student").toLowerCase();
+
+        if (role === "admin") {
+          window.location.replace("admin.html");
+        } else if (role === "worker") {
+          window.location.replace("worker.html");
+        } else {
+          window.location.replace("user.html");
+        }
+      } catch (error) {
+        console.error("INVENTRA login error:", error);
+
+        message.textContent =
+          error.message || "Login failed. Please try again.";
+
+        loginButton.disabled = false;
+        loginButton.querySelector("span").textContent =
+          "Continue with Google";
+      }
+    });
+  </script>
+</body>
+</html>

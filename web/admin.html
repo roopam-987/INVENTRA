@@ -1,0 +1,597 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INVENTRA | Admin Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#071426;color:#eaf2ff;font-family:"DM Sans",sans-serif}
+header{min-height:76px;background:#0a1a30;border-bottom:1px solid #20334d;padding:0 5%;display:flex;align-items:center;justify-content:space-between}
+.brand{font:800 22px Manrope}
+.brand span{color:#58a6ff}
+.right{display:flex;align-items:center;gap:14px;color:#9bb0ca;font-size:13px}
+button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer;background:#2879e8;color:white;font-family:inherit}
+button:disabled{opacity:.5;cursor:not-allowed}
+.logout{background:#1c3554}
+main{max-width:1350px;margin:35px auto;padding:0 22px}
+.eyebrow{color:#65b5ff;font-size:11px;letter-spacing:2px;font-weight:800}
+h1{font:800 32px Manrope;margin:8px 0}
+.sub{color:#9bb0ca;margin:0 0 25px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:22px}
+.stat,.panel{background:#0d2038;border:1px solid #203b5d;border-radius:15px;padding:20px}
+.stat small{color:#9bb0ca}
+.stat strong{display:block;font:800 28px Manrope;margin-top:8px}
+.panel{margin-bottom:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+h2{font:700 18px Manrope;margin:0}
+.filters{display:flex;gap:9px;flex-wrap:wrap}
+input,select{background:#08182b;color:#eaf2ff;border:1px solid #294361;border-radius:9px;padding:10px 12px;font:inherit;min-width:130px}
+input:focus,select:focus{outline:1px solid #58a6ff}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{text-align:left;padding:13px 11px;border-bottom:1px solid #203650;font-size:13px;vertical-align:middle}
+th{color:#8eabc9;font-size:11px;text-transform:uppercase;letter-spacing:.7px}
+td{color:#dce9f8}
+.muted{color:#8da6c2;font-size:12px;margin-top:4px;max-width:250px;overflow-wrap:anywhere}
+.status{display:inline-block;padding:5px 9px;border-radius:20px;background:#193957;color:#8ecaff;font-size:11px;font-weight:700}
+.status.resolved{background:#123c32;color:#8de4c2}
+.status.progress{background:#453719;color:#f3d18a}
+.status.faulty{background:#45232d;color:#ffb6c1}
+.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.actions select{min-width:115px;padding:8px;font-size:12px}
+.assign{background:#245b94;padding:8px 10px}
+.save{padding:8px 10px}
+.message{display:none;padding:12px;border-radius:9px;margin:0 0 16px;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.message.ok{display:block;background:#103b35;color:#9af0ce}
+.message.err{display:block;background:#421f2a;color:#ffb6c1}
+.empty{text-align:center;color:#8da6c2;padding:30px}
+@media(max-width:800px){
+ .stats{grid-template-columns:repeat(2,1fr)}
+ header{padding:14px 16px}
+ .right span{display:none}
+ h1{font-size:26px}
+ main{margin:25px auto}
+}
+@media(max-width:450px){
+ .stats{grid-template-columns:1fr 1fr;gap:9px}
+ .stat{padding:14px}
+ .stat strong{font-size:23px}
+ .panel{padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    INVEN<span>TRA</span>
+    <span style="color:#9bb0ca;font:600 12px 'DM Sans'">ADMIN</span>
+  </div>
+
+  <div class="right">
+    <span id="adminName">Checking login...</span>
+    <button class="logout" id="logoutBtn" type="button">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div class="eyebrow">ADMINISTRATION / CONTROL CENTER</div>
+  <h1>Campus maintenance overview</h1>
+  <p class="sub">Monitor computer inventory, review reported faults, and assign maintenance work.</p>
+
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
+  <section class="stats">
+    <div class="stat">
+      <small>Total computers</small>
+      <strong id="totalAssets">—</strong>
+    </div>
+    <div class="stat">
+      <small>Open tickets</small>
+      <strong id="openTickets">—</strong>
+    </div>
+    <div class="stat">
+      <small>In progress</small>
+      <strong id="progressTickets">—</strong>
+    </div>
+    <div class="stat">
+      <small>Resolved</small>
+      <strong id="resolvedTickets">—</strong>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Computer inventory</h2>
+      <button id="refreshBtn" type="button">Refresh data</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Asset code</th>
+            <th>Laboratory</th>
+            <th>Type</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="assetsBody">
+          <tr><td colspan="4" class="empty">Loading inventory...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Maintenance tickets</h2>
+
+      <div class="filters">
+        <input id="searchBox" placeholder="Search ticket / PC..." aria-label="Search tickets">
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option value="Open">Open</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Computer</th>
+            <th>Lab</th>
+            <th>Fault</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assign / Update</th>
+          </tr>
+        </thead>
+        <tbody id="ticketsBody">
+          <tr><td colspan="7" class="empty">Loading tickets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { watchAuth, logout } from "./js/firebase.js";
+import {
+  api,
+  getLabs,
+  getTickets,
+  updateTicket,
+  assignTicket
+} from "./js/api.js";
+
+const $ = id => document.getElementById(id);
+
+let allTickets = [];
+let allAssets = [];
+let workers = [];
+let currentUser = null;
+let loading = false;
+
+function showMessage(text, type = "ok") {
+  $("message").textContent = text;
+  $("message").className = "message " + type;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
+}
+
+function normalize(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function ticketCode(ticket) {
+  return ticket.ticket_code ||
+         ticket.ticketCode ||
+         ticket.id ||
+         "Unknown";
+}
+
+function ticketDatabaseId(ticket) {
+  return ticket.id ||
+         ticket.database_id ||
+         ticket.databaseId ||
+         ticket.uuid ||
+         "";
+}
+
+function workerId(worker) {
+  return worker.firebase_uid ||
+         worker.worker_id ||
+         worker.id ||
+         "";
+}
+
+function workerLabel(worker) {
+  return worker.display_name ||
+         worker.name ||
+         worker.email ||
+         workerId(worker);
+}
+
+function statusClass(status) {
+  const value = normalize(status);
+
+  if (value === "resolved") return "resolved";
+  if (value.includes("progress")) return "progress";
+  return "";
+}
+
+function getAssetCode(ticket) {
+  return ticket.asset_code ||
+         ticket.assetCode ||
+         ticket.pc ||
+         "—";
+}
+
+function getLab(ticket) {
+  return ticket.lab ||
+         ticket.lab_id ||
+         ticket.labId ||
+         "—";
+}
+
+function getFault(ticket) {
+  return ticket.fault_type ||
+         ticket.fault ||
+         ticket.issue_type ||
+         "—";
+}
+
+async function loadData() {
+  if (loading) return;
+
+  loading = true;
+  $("refreshBtn").disabled = true;
+
+  try {
+    const [labResult, ticketResult, workerResult] = await Promise.all([
+      getLabs(),
+      getTickets(),
+      api("/workers")
+    ]);
+
+    const labs = Array.isArray(labResult.labs)
+      ? labResult.labs
+      : [];
+
+    allTickets = Array.isArray(ticketResult.tickets)
+      ? ticketResult.tickets
+      : [];
+
+    workers = Array.isArray(workerResult.workers)
+      ? workerResult.workers
+      : [];
+
+    allAssets = [];
+
+    labs.forEach(lab => {
+      const computers = Array.isArray(lab.pcs) ? lab.pcs : [];
+
+      computers.forEach(pc => {
+        if (typeof pc === "string") {
+          allAssets.push({
+            asset_code: pc,
+            lab_id: lab.lab_id || lab.lab || lab.name || "—",
+            asset_type: "Computer",
+            status: "Working"
+          });
+        } else {
+          allAssets.push({
+            ...pc,
+            lab_id: pc.lab_id || lab.lab_id || lab.lab || lab.name || "—"
+          });
+        }
+      });
+    });
+
+    renderStats();
+    renderAssets();
+    renderTickets();
+
+    showMessage("Dashboard updated successfully.");
+
+  } catch (error) {
+    showMessage(
+      error.message || "Could not load dashboard data.",
+      "err"
+    );
+  } finally {
+    loading = false;
+    $("refreshBtn").disabled = false;
+  }
+}
+
+function renderStats() {
+  $("totalAssets").textContent = allAssets.length;
+
+  $("openTickets").textContent = allTickets.filter(
+    ticket => normalize(ticket.status) === "open"
+  ).length;
+
+  $("progressTickets").textContent = allTickets.filter(
+    ticket => normalize(ticket.status).includes("progress")
+  ).length;
+
+  $("resolvedTickets").textContent = allTickets.filter(
+    ticket => normalize(ticket.status) === "resolved"
+  ).length;
+}
+
+function renderAssets() {
+  if (!allAssets.length) {
+    $("assetsBody").innerHTML =
+      '<tr><td colspan="4" class="empty">No inventory records found.</td></tr>';
+    return;
+  }
+
+  $("assetsBody").innerHTML = allAssets.map(asset => {
+    const status = asset.status || "Working";
+    const statusStyle = normalize(status) === "faulty"
+      ? "faulty"
+      : "";
+
+    return `
+      <tr>
+        <td><strong>${escapeHTML(
+          asset.asset_code || asset.assetCode || "—"
+        )}</strong></td>
+
+        <td>${escapeHTML(
+          asset.lab_id || asset.lab || "—"
+        )}</td>
+
+        <td>${escapeHTML(
+          asset.asset_type || asset.type || "Computer"
+        )}</td>
+
+        <td>
+          <span class="status ${statusStyle}">
+            ${escapeHTML(status)}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderTickets() {
+  const search = normalize($("searchBox").value);
+  const filter = normalize($("statusFilter").value);
+
+  const visible = allTickets.filter(ticket => {
+    const searchable = [
+      ticketCode(ticket),
+      getAssetCode(ticket),
+      getLab(ticket),
+      getFault(ticket),
+      ticket.description,
+      ticket.reported_by,
+      ticket.priority,
+      ticket.status
+    ].join(" ").toLowerCase();
+
+    const matchesSearch = searchable.includes(search);
+    const matchesStatus =
+      !filter || normalize(ticket.status) === filter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  if (!visible.length) {
+    $("ticketsBody").innerHTML =
+      '<tr><td colspan="7" class="empty">No matching tickets found.</td></tr>';
+    return;
+  }
+
+  $("ticketsBody").innerHTML = visible.map(ticket => {
+    const code = ticketCode(ticket);
+    const databaseId = ticketDatabaseId(ticket);
+    const status = ticket.status || "Open";
+
+    const workerOptions = workers.map(worker => `
+      <option value="${escapeHTML(workerId(worker))}">
+        ${escapeHTML(workerLabel(worker))}
+      </option>
+    `).join("");
+
+    return `
+      <tr data-ticket-id="${escapeHTML(databaseId)}"
+          data-ticket-code="${escapeHTML(code)}">
+
+        <td><strong>${escapeHTML(code)}</strong></td>
+
+        <td>${escapeHTML(getAssetCode(ticket))}</td>
+
+        <td>${escapeHTML(getLab(ticket))}</td>
+
+        <td>
+          ${escapeHTML(getFault(ticket))}
+          <div class="muted">${escapeHTML(ticket.description || "")}</div>
+        </td>
+
+        <td>${escapeHTML(ticket.priority || "Normal")}</td>
+
+        <td>
+          <span class="status ${statusClass(status)}">
+            ${escapeHTML(status)}
+          </span>
+        </td>
+
+        <td>
+          <div class="actions">
+            <select class="worker-select" aria-label="Choose worker">
+              <option value="">Choose worker</option>
+              ${workerOptions}
+            </select>
+
+            <button class="assign" data-action="assign" type="button">
+              Assign
+            </button>
+
+            <select class="status-select" aria-label="Update ticket status">
+              <option value="Open" ${normalize(status)==="open"?"selected":""}>Open</option>
+              <option value="In Progress" ${normalize(status)==="in progress"?"selected":""}>In Progress</option>
+              <option value="Resolved" ${normalize(status)==="resolved"?"selected":""}>Resolved</option>
+            </select>
+
+            <button class="save" data-action="status" type="button">
+              Save
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// One delegated event handler handles ticket assignment and status updates.
+$("ticketsBody").addEventListener("click", async event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const row = button.closest("tr");
+  if (!row) return;
+
+  const id = row.dataset.ticketId;
+  const code = row.dataset.ticketCode;
+  const action = button.dataset.action;
+
+  button.disabled = true;
+
+  try {
+    if (action === "assign") {
+      const selectedWorker = row.querySelector(".worker-select").value;
+
+      if (!selectedWorker) {
+        showMessage("Choose a worker before assigning this ticket.", "err");
+        return;
+      }
+
+      if (!id) {
+        showMessage(
+          "This ticket is missing its database ID. It cannot be assigned.",
+          "err"
+        );
+        return;
+      }
+
+      await assignTicket(id, selectedWorker);
+
+      showMessage("Ticket " + code + " assigned successfully.");
+      await loadData();
+    }
+
+    if (action === "status") {
+      const newStatus = row.querySelector(".status-select").value;
+
+      if (!id) {
+        showMessage(
+          "This ticket is missing its database ID. It cannot be updated.",
+          "err"
+        );
+        return;
+      }
+
+      await updateTicket(id, newStatus);
+
+      showMessage("Ticket " + code + " status updated.");
+      await loadData();
+    }
+
+  } catch (error) {
+    showMessage(error.message || "The requested action failed.", "err");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("refreshBtn").addEventListener("click", loadData);
+$("searchBox").addEventListener("input", renderTickets);
+$("statusFilter").addEventListener("change", renderTickets);
+
+$("logoutBtn").addEventListener("click", async () => {
+  $("logoutBtn").disabled = true;
+
+  try {
+    await logout();
+    location.href = "/login";
+  } catch (error) {
+    showMessage("Could not log out. Please try again.", "err");
+    $("logoutBtn").disabled = false;
+  }
+});
+
+watchAuth(async user => {
+  if (!user) {
+    location.href = "/login";
+    return;
+  }
+
+  currentUser = user;
+  $("adminName").textContent =
+    user.displayName || user.email || "Administrator";
+
+  try {
+    const profile = await api("/me");
+
+    const role = normalize(
+      profile.role ||
+      profile.profile?.role ||
+      ""
+    );
+
+    if (role !== "admin") {
+      if (role === "worker") {
+        location.href = "/worker";
+      } else if (role === "student") {
+        location.href = "/user";
+      } else {
+        showMessage("Your account does not have administrator access.", "err");
+      }
+      return;
+    }
+
+    $("adminName").textContent =
+      profile.display_name ||
+      profile.name ||
+      profile.profile?.display_name ||
+      user.displayName ||
+      user.email ||
+      "Administrator";
+
+    await loadData();
+
+  } catch (error) {
+    showMessage(
+      error.message || "Unable to verify administrator access.",
+      "err"
+    );
+  }
+});
+</script>
+
+</body>
+</html>

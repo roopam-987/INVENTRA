@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: inventra
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        value: inventra-2e43e
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json

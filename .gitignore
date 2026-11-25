@@ -1,0 +1,10 @@
+target/
+.env
+.env.*
+*.class
+*.log
+firebase-service-account.json
+service-account*.json
+.DS_Store
+.vscode/
+.idea/
