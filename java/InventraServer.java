@@ -1171,131 +1171,135 @@ public class InventraServer {
     // ADMIN ASSIGNMENT API
     // =====================================================
 
-    private static void handleAssignments(HttpExchange ex)
-            throws IOException {
+  
+private static void handleAssignments(HttpExchange ex)
+        throws IOException {
 
-        if (preflight(ex)) return;
+    if (preflight(ex)) return;
 
-        try {
-            User admin = requireRole(ex, "admin");
+    try {
+        User admin = requireRole(ex, "admin");
 
-            if (!"POST".equalsIgnoreCase(ex.getRequestMethod())) {
-                sendError(ex, 405, "POST required.");
-                return;
-            }
+        if (!"POST".equalsIgnoreCase(ex.getRequestMethod())) {
+            sendError(ex, 405, "POST required.");
+            return;
+        }
 
-            JsonNode input = body(ex);
+        JsonNode input = body(ex);
 
-            String ticketId = value(input, "ticket_id");
-            String workerId = value(input, "worker_id");
+        String ticketId = value(input, "ticket_id").trim();
+        String workerId = value(input, "worker_id").trim();
 
-            if (ticketId.isBlank() || workerId.isBlank()) {
-                sendError(
-                    ex,
-                    400,
-                    "Ticket ID and worker are required."
-                );
-                return;
-            }
+        if (ticketId.isBlank() || workerId.isBlank()) {
+            sendError(ex, 400, "Ticket ID and worker are required.");
+            return;
+        }
 
-            JsonNode workerRows = supabase(
-                "GET",
-                "/profiles?firebase_uid=eq." + enc(workerId)
-                    + "&role=eq.worker&select=firebase_uid",
-                null,
-                null
-            );
+        // Verify that the selected account is a worker.
+        JsonNode workerRows = supabase(
+            "GET",
+            "/profiles?firebase_uid=eq." + enc(workerId)
+                + "&role=eq.worker&select=firebase_uid",
+            null,
+            null
+        );
 
-            if (!workerRows.isArray() || workerRows.isEmpty()) {
-                sendError(
-                    ex,
-                    400,
-                    "Selected account is not a registered worker."
-                );
-                return;
-            }
+        if (!workerRows.isArray() || workerRows.isEmpty()) {
+            sendError(ex, 400,
+                "Selected account is not a registered worker.");
+            return;
+        }
 
-            // Accept either the database UUID or displayed ticket code.
-            JsonNode ticketRows = supabase(
-                "GET",
-                "/tickets?id=eq." + enc(ticketId) + "&select=id",
-                null,
-                null
-            );
+        // Detect whether the supplied identifier is a database UUID.
+        boolean isUuid = ticketId.matches(
+            "(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        );
 
-            if (!ticketRows.isArray() || ticketRows.isEmpty()) {
+        // Never send an INVENTRA ticket code to the UUID column.
+        String ticketFilter;
 
-                ticketRows = supabase(
-                    "GET",
-                    "/tickets?ticket_code=eq." + enc(ticketId)
-                        + "&select=id",
-                    null,
-                    null
-                );
-            }
+        if (isUuid) {
+            ticketFilter = "id=eq." + enc(ticketId);
+        } else {
+            ticketFilter = "ticket_code=eq." + enc(ticketId);
+        }
 
-            if (!ticketRows.isArray() || ticketRows.isEmpty()) {
-                sendError(ex, 404, "Ticket does not exist.");
-                return;
-            }
+        JsonNode ticketRows = supabase(
+            "GET",
+            "/tickets?" + ticketFilter + "&select=id,ticket_code",
+            null,
+            null
+        );
 
-            String databaseTicketId =
-                value(ticketRows.get(0), "id");
+        if (!ticketRows.isArray() || ticketRows.isEmpty()) {
+            sendError(ex, 404, "Ticket does not exist.");
+            return;
+        }
 
-            JsonNode existing = supabase(
-                "GET",
-                "/assignments?ticket_id=eq."
-                    + enc(databaseTicketId)
-                    + "&worker_id=eq." + enc(workerId)
-                    + "&select=id",
-                null,
-                null
-            );
+        // Always use the actual database UUID for assignments.
+        String databaseTicketId =
+            value(ticketRows.get(0), "id").trim();
 
-            if (existing.isArray() && !existing.isEmpty()) {
+        if (databaseTicketId.isBlank()) {
+            sendError(ex, 500, "Ticket database ID is missing.");
+            return;
+        }
 
-                ObjectNode result = JSON.createObjectNode();
+        // Prevent duplicate assignment to the same worker.
+        JsonNode existing = supabase(
+            "GET",
+            "/assignments?ticket_id=eq."
+                + enc(databaseTicketId)
+                + "&worker_id=eq." + enc(workerId)
+                + "&select=id",
+            null,
+            null
+        );
 
-                result.put("success", true);
-                result.put("message", "Worker is already assigned.");
-
-                send(ex, 200, result);
-                return;
-            }
-
-            ObjectNode assignment = JSON.createObjectNode();
-
-            assignment.put("ticket_id", databaseTicketId);
-            assignment.put("worker_id", workerId);
-            assignment.put("assigned_by", admin.uid);
-
-            supabase(
-                "POST",
-                "/assignments",
-                assignment,
-                "return=representation"
-            );
-
-            auditBestEffort(
-                admin.uid,
-                "Ticket assigned to worker",
-                "ticket",
-                databaseTicketId
-            );
-
+        if (existing.isArray() && !existing.isEmpty()) {
             ObjectNode result = JSON.createObjectNode();
             result.put("success", true);
+            result.put("message", "Worker is already assigned.");
 
-            send(ex, 201, result);
-
-        } catch (SecurityException e) {
-            sendError(ex, 401, e.getMessage());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            sendError(ex, 500, "Assignment failed.");
+            send(ex, 200, result);
+            return;
         }
+
+        // Create assignment using the database UUID.
+        ObjectNode assignment = JSON.createObjectNode();
+        assignment.put("ticket_id", databaseTicketId);
+        assignment.put("worker_id", workerId);
+        assignment.put("assigned_by", admin.uid);
+
+        supabase(
+            "POST",
+            "/assignments",
+            assignment,
+            "return=representation"
+        );
+
+        auditBestEffort(
+            admin.uid,
+            "Ticket assigned to worker",
+            "ticket",
+            databaseTicketId
+        );
+
+        ObjectNode result = JSON.createObjectNode();
+        result.put("success", true);
+        result.put("message", "Ticket assigned successfully.");
+        result.put("ticket_id", databaseTicketId);
+
+        send(ex, 201, result);
+
+    } catch (SecurityException e) {
+        sendError(ex, 401, e.getMessage());
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        sendError(ex, 500, "Assignment failed: " + e.getMessage());
     }
+}
 
     // =====================================================
     // AUDIT LOGGING
